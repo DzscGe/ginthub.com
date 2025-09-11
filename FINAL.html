@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title data-i18n="appTitle">Générateur NFT — v4.8</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto:wght@400;700&family=Oswald:wght@400;700&family=Montserrat:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:wght@400;700&family=Creepster&family=Nosifer&family=Metal+Mania&family=Eater&family=Butcherman&display=swap&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Bebas+Neue&family=Pacifico&family=Orbitron:wght@400;700&family=Indie+Flower" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --panel: #0f1624;
+      --muted: #93a0b5;
+      --border: rgba(255,255,255,.08);
+      --accent: #6c8cff;
+      --accent-2: #3d5a80;
+      --success: #4ade80;
+      --text: #e8eefb;
+    }
+    .light-mode {
+      --bg: #f5f5f5;
+      --panel: #ffffff;
+      --muted: #6b7280;
+      --border: rgba(0,0,0,.1);
+      --accent: #1e3a8a;
+      --accent-2: #3b82f6;
+      --success: #16a34a;
+      --text: #1f2937;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 28px auto;
+      padding: 18px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.1);
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    label {
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      padding: 8px;
+      font-size: 14px;
+      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    textarea {
+      min-height: 80px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .btn {
+      background: var(--accent);
+      border: none;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.3s ease;
+    }
+    .btn.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+      transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      align-items: center;
+    }
+    .preview {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .thumb {
+      position: relative;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      width: 100%;
+      height: 100%;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .thumb canvas {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    .badge {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #fff;
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .hidden {
+      display: none!important;
+    }
+    #dropZone {
+      border: 2px dashed var(--border);
+      padding: 12px;
+      text-align: center;
+      border-radius: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    #dropZone.dragover {
+      background: rgba(255,255,255,0.02);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .light-mode #dropZone.dragover {
+      background: rgba(0,0,0,0.02);
+    }
+    .section-title {
+      font-weight: 700;
+      margin-top: 12px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    progress {
+      width: 100%;
+      height: 14px;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: var(--border);
+    }
+    progress::-webkit-progress-bar {
+      background-color: var(--border);
+    }
+    progress::-webkit-progress-value {
+      background-color: var(--accent);
+      transition: background-color 0.3s ease;
+    }
+    progress::-moz-progress-bar {
+      background-color: var(--accent);
+      transition: background-color 0.3s ease;
+    }
+    footer {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+    .theme-toggle:hover {
+        background: rgba(255,255,255,0.05);
+    }
+    .light-mode .theme-toggle:hover {
+        background: rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 data-i18n="appTitle">Générateur NFT — v4.8</h1>
+      <div style="display: flex; gap: 8px;">
+        <select id="lang-select" style="width: auto;">
+          <option value="fr">Français 🇨🇭</option>
+          <option value="en">English 🇺🇸</option>
+          <option value="es">Español 🇪🇸</option>
+          <option value="ar">العربية 🇩🇿</option>
+          <option value="de">Deutsch 🇩🇪</option>
+          <option value="it">Italiano 🇮🇹</option>
+        </select>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Basculer le thème">
+          <svg id="moon-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+          <svg id="sun-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m4.93 19.07 1.41-1.41"></path>
+            <path d="m17.66 6.34 1.41-1.41"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+    <div class="main-grid">
+      <div class="side-panel">
+        <section class="card">
+          <div class="card-title" data-i18n="section1Title">1. Réglages Généraux</div>
+          <div class="row">
+            <div>
+              <label data-i18n="imagesSource">Images source</label>
+              <input id="file" type="file" accept="image/*" multiple>
+              <div id="dropZone" data-i18n="dropZoneText">Glissez-déposez vos images ici ou cliquez</div>
+            </div>
+            <div>
+              <label data-i18n="variantsPerImage">Variantes / image</label>
+              <input id="count" type="number" min="1" max="10000" value="5">
+            </div>
+          </div>
+          <div class="controls-grid">
+            <div>
+              <label data-i18n="baseName">Nom de base</label>
+              <input id="baseName" value="NFT">
+            </div>
+            <div>
+              <label data-i18n="collectionName">Collection</label>
+              <input id="collectionName" value="MyCollection">
+            </div>
+          </div>
+          <div style="margin-top:12px"><label data-i18n="description">Description</label><textarea id="desc">Une pièce unique aux couleurs vibrantes de l'ère numérique.</textarea></div>
+          <div class="controls-grid">
+            <div>
+              <label data-i18n="ipfsCid">CID IPFS</label>
+              <input id="cid" placeholder="ex: QmXyz...">
+              <div class="hint" data-i18n="cidHint">Utilisé dans <code>ipfs://CID/fichier.png</code></div>
+            </div>
+            <div style="display:flex;align-items:end"><label style="width:100%"><input type="checkbox" id="useSubfolders" checked> <span data-i18n="organizeSubfolders">Organiser en sous-dossiers</span></label></div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <div><label data-i18n="imageSize">Taille image (px)</label><input id="size" type="number" min="256" max="4096" value="1024"></div>
+            <div><label data-i18n="watermark">Watermark</label><select id="wm"><option value="on" data-i18n="active">Actif</option><option value="off" data-i18n="off">Off</option></select></div>
+          </div>
+          <div style="margin-top:12px">
+            <label><input type="checkbox" id="keepOriginalSizeChk"> <span data-i18n="keepOriginalSize">Conserver taille originale</span></label>
+          </div>
+        </section>
+        
+        <section class="card">
+          <div class="card-title" data-i18n="section2Title">2. Style & Effets</div>
+          <div class="controls-grid">
+            <div>
+              <label data-i18n="style">Style</label>
+              <select id="colorMode">
+                <option value="original" data-i18n="originalImage">Image originale</option>
+                <option value="golden" data-i18n="goldenColor">Couleur (angle d'or)</option>
+                <option value="gradient" data-i18n="randomGradient">Dégradé aléatoire</option>
+                <option value="shapes" data-i18n="shapesRandom">Formes (aléatoire)</option>
+                <option value="glitch" data-i18n="glitch">Glitch</option>
+                <option value="neon" data-i18n="neon">Néon</option>
+                <option value="halloween" data-i18n="halloween">Halloween</option>
+                <option value="pixel-art" data-i18n="pixelArt">Pixel Art</option>
+                <option value="random" data-i18n="random">Aléatoire</option>
+              </select>
+            </div>
+            <div></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-title" data-i18n="section3Title">3. Cadre & Marges</div>
+          <label><input type="checkbox" id="addFrame"> <span data-i18n="activateFrame">Activer le cadre</span></label>
+          <div id="frameOptions" class="hidden" style="margin-top:8px">
+            <div class="row">
+              <div>
+                <label data-i18n="horizontalMargin">Marge horizontale (%)</label>
+                <input type="range" id="framePaddingX" min="0" max="100" value="10">
+                <div class="hint"><span id="framePaddingXValue">10</span>%</div>
+              </div>
+              <div>
+                <label data-i18n="verticalMargin">Marge verticale (%)</label>
+                <input type="range" id="framePaddingY" min="0" max="100" value="10">
+                <div class="hint"><span id="framePaddingYValue">10</span>%</div>
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label data-i18n="imageSizeInFrame">Taille image dans le cadre (%)</label>
+                <input type="range" id="photoSize" min="0" max="100" value="85">
+                <div class="hint"><span id="photoSizeValue">85</span>%</div>
+              </div>
+              <div></div>
+            </div>
+            <div class="toolbar" style="margin-top:10px">
+              <button class="btn secondary" id="resetMargins" data-i18n="resetMargins">Réinitialiser les marges</button>
+            </div>
+            <div class="hint" style="margin-top:6px" data-i18n="noFrameHint">À <strong>0%</strong> (H & V), aucun cadre n'est dessiné.</div>
+            <div class="controls-grid" style="margin-top:12px">
+              <div>
+                <label data-i18n="frameColor">Couleur du cadre</label>
+                <input type="color" id="frameColor" value="#3d5a80">
+              </div>
+              <div>
+                <label data-i18n="descColor">Couleur description</label>
+                <input type="color" id="descColor" value="#ffffff">
+              </div>
+            </div>
+            <div class="controls-grid" style="margin-top:10px">
+              <div>
+                <label data-i18n="nameFontSize">Taille police Nom (%)</label>
+                <input type="range" id="nameFontSize" min="50" max="300" value="100">
+                <div class="hint"><span id="nameFontSizeValue">100</span>%</div>
+              </div>
+              <div>
+                <label data-i18n="descFontSize">Taille police Desc (%)</label>
+                <input type="range" id="descFontSize" min="50" max="300" value="100">
+                <div class="hint"><span id="descFontSizeValue">100</span>%</div>
+              </div>
+            </div>
+            <div class="controls-grid" style="margin-top:10px">
+              <div>
+                <label data-i18n="nameFont">Police Nom</label>
+                <select id="nameFont">
+                  <option>Inter</option><option>Roboto</option><option>Oswald</option><option>Montserrat</option><option>Lora</option><option>Playfair Display</option>
+                  <option>Creepster</option><option>Nosifer</option><option>Metal Mania</option><option>Eater</option><option>Butcherman</option>
+                <option>Poppins</option><option>Raleway</option><option>Bebas Neue</option><option>Pacifico</option><option>Orbitron</option><option>Indie Flower</option></select>
+              </div>
+              <div>
+                <label data-i18n="descFont">Police Description</label>
+                <select id="descFont">
+                  <option>Inter</option><option>Roboto</option><option>Oswald</option><option>Montserrat</option><option>Lora</option><option>Playfair Display</option>
+                  <option>Creepster</option><option>Nosifer</option><option>Metal Mania</option><option>Eater</option><option>Butcherman</option>
+                <option>Poppins</option><option>Raleway</option><option>Bebas Neue</option><option>Pacifico</option><option>Orbitron</option><option>Indie Flower</option></select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-title" data-i18n="section4Title">4. Exporter les résultats</div>
+          <div class="toolbar">
+            <button class="btn" id="generate" data-i18n="preview">Prévisualiser</button>
+            <button class="btn secondary" id="saveSettings" data-i18n="saveSettings">Sauvegarder réglages</button>
+            <button class="btn secondary" id="resetAll" data-i18n="resetAll">Réinitialiser tout</button>
+          </div>
+          <div style="margin-top:12px" class="toolbar">
+            <button class="btn secondary" id="zipWithDesc" disabled data-i18n="exportWithDesc">Exporter (+ desc)</button>
+            <button class="btn secondary" id="zipNoDesc" disabled data-i18n="exportNoDesc">Exporter (sans desc)</button>
+            <button class="btn secondary" id="zipSepBoth" disabled data-i18n="separateZips">ZIP séparés</button>
+            <button class="btn secondary" id="zipImagesOnly" disabled data-i18n="zipImagesOnly">ZIP images</button>
+            <button class="btn secondary" id="zipMetaOnly" disabled data-i18n="zipMetaOnly">ZIP metadata</button>
+          </div>
+          <div style="margin-top:12px">
+            <label data-i18n="progress">Progression</label>
+            <progress id="progressBar" value="0" max="100"></progress>
+            <div id="progressLabel" class="muted" style="margin-top:6px" data-i18n="ready">Prêt</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="side-panel">
+        <section class="card">
+          <div class="card-title" data-i18n="realtimePreview">Aperçu en temps réel <span class="muted" data-i18n="liveReactive">Live • Réactif</span></div>
+          <div id="previewLive" class="preview"></div>
+          <div class="toolbar"><button class="btn secondary" id="downloadLiveBtn" disabled data-i18n="downloadLive">Télécharger le live</button></div>
+          <div class="hint" style="margin-top: 5px;" data-i18n="liveHint">Affiche la première image source avec le style sélectionné en temps réel.</div>
+        </section>
+        <section class="card">
+          <div class="card-title" data-i18n="previewSection">Prévisualisation <span class="muted" data-i18n="upTo3Images">Jusqu'à 3 images sources</span></div>
+          <div id="preview" class="preview-grid"></div>
+        </section>
+      </div>
+    </div>
+    <footer class="muted">Made with ❤️ — Version v4.8 <br> Made by BMTA</footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <script>
+    /* ---------- DOM ---------- */
+    const fileInput = document.getElementById('file');
+    const dropZone = document.getElementById('dropZone');
+    const preview = document.getElementById('preview');
+    const previewLive = document.getElementById('previewLive');
+    const generateBtn = document.getElementById('generate');
+    const saveSettingsBtn = document.getElementById('saveSettings');
+    const resetAllBtn = document.getElementById('resetAll');
+    const colorModeSelect = document.getElementById('colorMode');
+    const addFrameChk = document.getElementById('addFrame');
+    const frameOptions = document.getElementById('frameOptions');
+    const framePaddingX = document.getElementById('framePaddingX');
+    const framePaddingY = document.getElementById('framePaddingY');
+    const framePaddingXValue = document.getElementById('framePaddingXValue');
+    const framePaddingYValue = document.getElementById('framePaddingYValue');
+    const resetMarginsBtn = document.getElementById('resetMargins');
+    const zipWithDescBtn = document.getElementById('zipWithDesc');
+    const zipNoDescBtn = document.getElementById('zipNoDesc');
+    const zipSepBothBtn = document.getElementById('zipSepBoth');
+    const zipImagesOnlyBtn = document.getElementById('zipImagesOnly');
+    const zipMetaOnlyBtn = document.getElementById('zipMetaOnly');
+    const baseNameInput = document.getElementById('baseName');
+    const descInput = document.getElementById('desc');
+    const collectionNameInput = document.getElementById('collectionName');
+    const cidInput = document.getElementById('cid');
+    const useSubfolders = document.getElementById('useSubfolders');
+    const nameFont = document.getElementById('nameFont');
+    const descFont = document.getElementById('descFont');
+    const sizeInput = document.getElementById('size');
+    const wmSelect = document.getElementById('wm');
+    const countInput = document.getElementById('count');
+    const frameColorInput = document.getElementById('frameColor');
+    const descColorInput = document.getElementById('descColor');
+    const photoSize = document.getElementById('photoSize');
+    const photoSizeValue = document.getElementById('photoSizeValue');
+    const nameFontSize = document.getElementById('nameFontSize');
+    const nameFontSizeValue = document.getElementById('nameFontSizeValue');
+    const descFontSize = document.getElementById('descFontSize');
+    const descFontSizeValue = document.getElementById('descFontSizeValue');
+    const progressBar = document.getElementById('progressBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const downloadLiveBtn = document.getElementById('downloadLiveBtn');
+    const keepOriginalSizeChk = document.getElementById('keepOriginalSizeChk');
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const sunIcon = document.getElementById('sun-icon');
+    const moonIcon = document.getElementById('moon-icon');
+    const langSelect = document.getElementById('lang-select');
+
+    // New translation object
+    const translations = {
+      fr: {
+        appTitle: "Générateur NFT — v4.8",
+        section1Title: "1. Réglages Généraux",
+        imagesSource: "Images source",
+        dropZoneText: "Glissez-déposez vos images ici ou cliquez",
+        variantsPerImage: "Variantes / image",
+        baseName: "Nom de base",
+        collectionName: "Collection",
+        description: "Description",
+        uniquePieceDesc: "Une pièce unique aux couleurs vibrantes de l'ère numérique.",
+        ipfsCid: "CID IPFS",
+        cidHint: "Utilisé dans <code>ipfs://CID/fichier.png</code>",
+        organizeSubfolders: "Organiser en sous-dossiers",
+        imageSize: "Taille image (px)",
+        watermark: "Watermark",
+        active: "Actif",
+        off: "Off",
+        keepOriginalSize: "Conserver taille originale",
+        section2Title: "2. Style & Effets",
+        style: "Style",
+        originalImage: "Image originale",
+        goldenColor: "Couleur (angle d'or)",
+        randomGradient: "Dégradé aléatoire",
+        shapesRandom: "Formes (aléatoire)",
+        glitch: "Glitch",
+        neon: "Néon",
+        halloween: "Halloween",
+        pixelArt: "Pixel Art",
+        random: "Aléatoire",
+        section3Title: "3. Cadre & Marges",
+        activateFrame: "Activer le cadre",
+        horizontalMargin: "Marge horizontale (%)",
+        verticalMargin: "Marge verticale (%)",
+        imageSizeInFrame: "Taille image dans le cadre (%)",
+        resetMargins: "Réinitialiser les marges",
+        noFrameHint: "À <strong>0%</strong> (H & V), aucun cadre n'est dessiné.",
+        frameColor: "Couleur du cadre",
+        descColor: "Couleur description",
+        nameFontSize: "Taille police Nom (%)",
+        descFontSize: "Taille police Desc (%)",
+        nameFont: "Police Nom",
+        descFont: "Police Description",
+        section4Title: "4. Exporter les résultats",
+        preview: "Prévisualiser",
+        saveSettings: "Sauvegarder réglages",
+        resetAll: "Réinitialiser tout",
+        exportWithDesc: "Exporter (+ desc)",
+        exportNoDesc: "Exporter (sans desc)",
+        separateZips: "ZIP séparés",
+        zipImagesOnly: "ZIP images",
+        zipMetaOnly: "ZIP metadata",
+        progress: "Progression",
+        ready: "Prêt",
+        realtimePreview: "Aperçu en temps réel",
+        liveReactive: "Live • Réactif",
+        downloadLive: "Télécharger le live",
+        liveHint: "Affiche la première image source avec le style sélectionné en temps réel.",
+        previewSection: "Prévisualisation",
+        upTo3Images: "Jusqu'à 3 images sources",
+        resetConfirm: "Réinitialiser tous les réglages ?",
+        noImagesLoaded: "Aucune image chargée",
+        previewError: "Erreur preview: ",
+        noImages: "Aucune image",
+        finalizingZip: "Finalisation ZIP…",
+        done: "Terminé ✅",
+        settingsSaved: "Réglages sauvegardés ✅",
+        onlyImagesAccepted: "Seules les images sont acceptées",
+        themeToggleLabel: "Basculer le thème"
+      },
+      en: {
+        appTitle: "NFT Generator — v4.8",
+        section1Title: "1. General Settings",
+        imagesSource: "Source Images",
+        dropZoneText: "Drag & drop your images here or click",
+        variantsPerImage: "Variants / image",
+        baseName: "Base Name",
+        collectionName: "Collection",
+        description: "Description",
+        uniquePieceDesc: "A unique piece with the vibrant colors of the digital era.",
+        ipfsCid: "IPFS CID",
+        cidHint: "Used in <code>ipfs://CID/file.png</code>",
+        organizeSubfolders: "Organize in subfolders",
+        imageSize: "Image Size (px)",
+        watermark: "Watermark",
+        active: "Active",
+        off: "Off",
+        keepOriginalSize: "Keep original size",
+        section2Title: "2. Style & Effects",
+        style: "Style",
+        originalImage: "Original Image",
+        goldenColor: "Golden Color",
+        randomGradient: "Random Gradient",
+        shapesRandom: "Shapes (random)",
+        glitch: "Glitch",
+        neon: "Neon",
+        halloween: "Halloween",
+        pixelArt: "Pixel Art",
+        random: "Random",
+        section3Title: "3. Frame & Borders",
+        activateFrame: "Activate frame",
+        horizontalMargin: "Horizontal Margin (%)",
+        verticalMargin: "Vertical Margin (%)",
+        imageSizeInFrame: "Image size in frame (%)",
+        resetMargins: "Reset margins",
+        noFrameHint: "At <strong>0%</strong> (H & V), no frame is drawn.",
+        frameColor: "Frame color",
+        descColor: "Description color",
+        nameFontSize: "Name font size (%)",
+        descFontSize: "Description font size (%)",
+        nameFont: "Name Font",
+        descFont: "Description Font",
+        section4Title: "4. Export Results",
+        preview: "Preview",
+        saveSettings: "Save settings",
+        resetAll: "Reset all",
+        exportWithDesc: "Export (+ desc)",
+        exportNoDesc: "Export (no desc)",
+        separateZips: "Separate ZIPs",
+        zipImagesOnly: "ZIP images",
+        zipMetaOnly: "ZIP metadata",
+        progress: "Progress",
+        ready: "Ready",
+        realtimePreview: "Real-time preview",
+        liveReactive: "Live • Reactive",
+        downloadLive: "Download live",
+        liveHint: "Shows the first source image with the selected style in real time.",
+        previewSection: "Preview",
+        upTo3Images: "Up to 3 source images",
+        resetConfirm: "Reset all settings?",
+        noImagesLoaded: "No images loaded",
+        previewError: "Preview error: ",
+        noImages: "No images",
+        finalizingZip: "Finalizing ZIP…",
+        done: "Done ✅",
+        settingsSaved: "Settings saved ✅",
+        onlyImagesAccepted: "Only images are accepted",
+        themeToggleLabel: "Toggle theme"
+      },
+      es: {
+        appTitle: "Generador NFT — v4.8",
+        section1Title: "1. Ajustes Generales",
+        imagesSource: "Imágenes de origen",
+        dropZoneText: "Arrastra y suelta tus imágenes aquí o haz clic",
+        variantsPerImage: "Variantes / imagen",
+        baseName: "Nombre base",
+        collectionName: "Colección",
+        description: "Descripción",
+        uniquePieceDesc: "Una pieza única con los colores vibrantes de la era digital.",
+        ipfsCid: "CID IPFS",
+        cidHint: "Utilizado en <code>ipfs://CID/archivo.png</code>",
+        organizeSubfolders: "Organizar en subcarpetas",
+        imageSize: "Tamaño de imagen (px)",
+        watermark: "Marca de agua",
+        active: "Activo",
+        off: "Apagado",
+        keepOriginalSize: "Conservar tamaño original",
+        section2Title: "2. Estilo y Efectos",
+        style: "Estilo",
+        originalImage: "Imagen original",
+        goldenColor: "Color (ángulo dorado)",
+        randomGradient: "Degradado aleatorio",
+        shapesRandom: "Formas (aleatorio)",
+        glitch: "Glitch",
+        neon: "Neón",
+        halloween: "Halloween",
+        pixelArt: "Pixel Art",
+        random: "Aleatorio",
+        section3Title: "3. Marco y Márgenes",
+        activateFrame: "Activar marco",
+        horizontalMargin: "Margen horizontal (%)",
+        verticalMargin: "Margen vertical (%)",
+        imageSizeInFrame: "Tamaño de imagen en el marco (%)",
+        resetMargins: "Restablecer márgenes",
+        noFrameHint: "A <strong>0%</strong> (H & V), no se dibuja ningún marco.",
+        frameColor: "Color del marco",
+        descColor: "Color de la descripción",
+        nameFontSize: "Tamaño de fuente del nombre (%)",
+        descFontSize: "Tamaño de fuente de la descripción (%)",
+        nameFont: "Fuente del nombre",
+        descFont: "Fuente de la descripción",
+        section4Title: "4. Exportar Resultados",
+        preview: "Previsualizar",
+        saveSettings: "Guardar ajustes",
+        resetAll: "Restablecer todo",
+        exportWithDesc: "Exportar (+ desc)",
+        exportNoDesc: "Exportar (sin desc)",
+        separateZips: "ZIPs separados",
+        zipImagesOnly: "ZIP de imágenes",
+        zipMetaOnly: "ZIP de metadatos",
+        progress: "Progreso",
+        ready: "Listo",
+        realtimePreview: "Vista previa en tiempo real",
+        liveReactive: "En vivo • Reactivo",
+        downloadLive: "Descargar en vivo",
+        liveHint: "Muestra la primera imagen de origen con el estilo seleccionado en tiempo real.",
+        previewSection: "Previsualización",
+        upTo3Images: "Hasta 3 imágenes de origen",
+        resetConfirm: "¿Restablecer todos los ajustes?",
+        noImagesLoaded: "No se cargaron imágenes",
+        previewError: "Error de vista previa: ",
+        noImages: "No hay imágenes",
+        finalizingZip: "Finalizando ZIP…",
+        done: "Terminado ✅",
+        settingsSaved: "Ajustes guardados ✅",
+        onlyImagesAccepted: "Solo se aceptan imágenes",
+        themeToggleLabel: "Cambiar tema"
+      },
+      ar: {
+        appTitle: "مولد NFT — v4.8",
+        section1Title: "1. إعدادات عامة",
+        imagesSource: "الصور المصدر",
+        dropZoneText: "اسحب وأسقط صورك هنا أو انقر",
+        variantsPerImage: "المتغيرات / الصورة",
+        baseName: "الاسم الأساسي",
+        collectionName: "المجموعة",
+        description: "الوصف",
+        uniquePieceDesc: "قطعة فريدة بألوان زاهية من العصر الرقمي.",
+        ipfsCid: "CID IPFS",
+        cidHint: "مستخدم في <code>ipfs://CID/file.png</code>",
+        organizeSubfolders: "التنظيم في مجلدات فرعية",
+        imageSize: "حجم الصورة (بكسل)",
+        watermark: "علامة مائية",
+        active: "نشط",
+        off: "متوقف",
+        keepOriginalSize: "الحفاظ على الحجم الأصلي",
+        section2Title: "2. النمط والتأثيرات",
+        style: "النمط",
+        originalImage: "الصورة الأصلية",
+        goldenColor: "اللون (الزاوية الذهبية)",
+        randomGradient: "تدرج عشوائي",
+        shapesRandom: "الأشكال (عشوائي)",
+        glitch: "خلل",
+        neon: "نيون",
+        halloween: "هالووين",
+        pixelArt: "فن البكسل",
+        random: "عشوائي",
+        section3Title: "3. الإطار والهوامش",
+        activateFrame: "تفعيل الإطار",
+        horizontalMargin: "الهامش الأفقي (%)",
+        verticalMargin: "الهامش العمودي (%)",
+        imageSizeInFrame: "حجم الصورة في الإطار (%)",
+        resetMargins: "إعادة تعيين الهوامش",
+        noFrameHint: "عند <strong>0%</strong> (أفقيًا وعموديًا)، لا يتم رسم إطار.",
+        frameColor: "لون الإطار",
+        descColor: "لون الوصف",
+        nameFontSize: "حجم خط الاسم (%)",
+        descFontSize: "حجم خط الوصف (%)",
+        nameFont: "خط الاسم",
+        descFont: "خط الوصف",
+        section4Title: "4. تصدير النتائج",
+        preview: "معاينة",
+        saveSettings: "حفظ الإعدادات",
+        resetAll: "إعادة تعيين الكل",
+        exportWithDesc: "تصدير (+ وصف)",
+        exportNoDesc: "تصدير (بدون وصف)",
+        separateZips: "ملفات ZIP منفصلة",
+        zipImagesOnly: "ملف ZIP للصور",
+        zipMetaOnly: "ملف ZIP للبيانات الوصفية",
+        progress: "التقدم",
+        ready: "جاهز",
+        realtimePreview: "معاينة في الوقت الحقيقي",
+        liveReactive: "مباشر • تفاعلي",
+        downloadLive: "تنزيل المباشر",
+        liveHint: "يعرض الصورة المصدر الأولى بالنمط المحدد في الوقت الحقيقي.",
+        previewSection: "معاينة",
+        upTo3Images: "حتى 3 صور مصدر",
+        resetConfirm: "إعادة تعيين جميع الإعدادات؟",
+        noImagesLoaded: "لم يتم تحميل أي صور",
+        previewError: "خطأ في المعاينة: ",
+        noImages: "لا توجد صور",
+        finalizingZip: "إنهاء ZIP...",
+        done: "تم ✅",
+        settingsSaved: "تم حفظ الإعدادات ✅",
+        onlyImagesAccepted: "يتم قبول الصور فقط",
+        themeToggleLabel: "تبديل المظهر"
+      },
+      de: {
+        appTitle: "NFT-Generator — v4.8",
+        section1Title: "1. Allgemeine Einstellungen",
+        imagesSource: "Quellbilder",
+        dropZoneText: "Bilder hierher ziehen oder klicken",
+        variantsPerImage: "Varianten / Bild",
+        baseName: "Basisname",
+        collectionName: "Sammlung",
+        description: "Beschreibung",
+        uniquePieceDesc: "Ein einzigartiges Stück mit den lebendigen Farben des digitalen Zeitalters.",
+        ipfsCid: "IPFS CID",
+        cidHint: "Wird in <code>ipfs://CID/datei.png</code> verwendet",
+        organizeSubfolders: "In Unterordnern organisieren",
+        imageSize: "Bildgröße (px)",
+        watermark: "Wasserzeichen",
+        active: "Aktiv",
+        off: "Aus",
+        keepOriginalSize: "Originalgröße beibehalten",
+        section2Title: "2. Stil & Effekte",
+        style: "Stil",
+        originalImage: "Originalbild",
+        goldenColor: "Farbe (goldener Winkel)",
+        randomGradient: "Zufälliger Farbverlauf",
+        shapesRandom: "Formen (zufällig)",
+        glitch: "Glitch",
+        neon: "Neon",
+        halloween: "Halloween",
+        pixelArt: "Pixelkunst",
+        random: "Zufällig",
+        section3Title: "3. Rahmen & Ränder",
+        activateFrame: "Rahmen aktivieren",
+        horizontalMargin: "Horizontaler Rand (%)",
+        verticalMargin: "Vertikaler Rand (%)",
+        imageSizeInFrame: "Bildgröße im Rahmen (%)",
+        resetMargins: "Ränder zurücksetzen",
+        noFrameHint: "Bei <strong>0%</strong> (H & V), wird kein Rahmen gezeichnet.",
+        frameColor: "Rahmenfarbe",
+        descColor: "Beschreibungstextfarbe",
+        nameFontSize: "Name Schriftgröße (%)",
+        descFontSize: "Beschreibung Schriftgröße (%)",
+        nameFont: "Name Schriftart",
+        descFont: "Beschreibung Schriftart",
+        section4Title: "4. Ergebnisse exportieren",
+        preview: "Vorschau",
+        saveSettings: "Einstellungen speichern",
+        resetAll: "Alles zurücksetzen",
+        exportWithDesc: "Exportieren (+ Beschr.)",
+        exportNoDesc: "Exportieren (ohne Beschr.)",
+        separateZips: "Separate ZIPs",
+        zipImagesOnly: "ZIP Bilder",
+        zipMetaOnly: "ZIP Metadaten",
+        progress: "Fortschritt",
+        ready: "Bereit",
+        realtimePreview: "Echtzeit-Vorschau",
+        liveReactive: "Live • Reaktiv",
+        downloadLive: "Live herunterladen",
+        liveHint: "Zeigt das erste Quellbild mit dem ausgewählten Stil in Echtzeit.",
+        previewSection: "Vorschau",
+        upTo3Images: "Bis zu 3 Quellbilder",
+        resetConfirm: "Alle Einstellungen zurücksetzen?",
+        noImagesLoaded: "Keine Bilder geladen",
+        previewError: "Vorschaufehler: ",
+        noImages: "Keine Bilder",
+        finalizingZip: "ZIP wird finalisiert…",
+        done: "Fertig ✅",
+        settingsSaved: "Einstellungen gespeichert ✅",
+        onlyImagesAccepted: "Nur Bilder werden akzeptiert",
+        themeToggleLabel: "Thema umschalten"
+      },
+      it: {
+        appTitle: "Generatore NFT — v4.8",
+        section1Title: "1. Impostazioni Generali",
+        imagesSource: "Immagini di origine",
+        dropZoneText: "Trascina e rilascia qui le tue immagini o clicca",
+        variantsPerImage: "Varianti / immagine",
+        baseName: "Nome base",
+        collectionName: "Collezione",
+        description: "Descrizione",
+        uniquePieceDesc: "Un pezzo unico con i colori vivaci dell'era digitale.",
+        ipfsCid: "CID IPFS",
+        cidHint: "Usato in <code>ipfs://CID/file.png</code>",
+        organizeSubfolders: "Organizza in sottocartelle",
+        imageSize: "Dimensione immagine (px)",
+        watermark: "Filigrana",
+        active: "Attivo",
+        off: "Spento",
+        keepOriginalSize: "Mantieni la dimensione originale",
+        section2Title: "2. Stile ed Effetti",
+        style: "Stile",
+        originalImage: "Immagine originale",
+        goldenColor: "Colore (angolo d'oro)",
+        randomGradient: "Sfumatura casuale",
+        shapesRandom: "Forme (casuali)",
+        glitch: "Glitch",
+        neon: "Neon",
+        halloween: "Halloween",
+        pixelArt: "Pixel Art",
+        random: "Casuale",
+        section3Title: "3. Cornice e Margini",
+        activateFrame: "Attiva cornice",
+        horizontalMargin: "Margine orizzontale (%)",
+        verticalMargin: "Margine verticale (%)",
+        imageSizeInFrame: "Dimensione immagine nella cornice (%)",
+        resetMargins: "Reimposta margini",
+        noFrameHint: "A <strong>0%</strong> (H & V), non viene disegnata alcuna cornice.",
+        frameColor: "Colore cornice",
+        descColor: "Colore descrizione",
+        nameFontSize: "Dimensione carattere Nome (%)",
+        descFontSize: "Dimensione carattere Descrizione (%)",
+        nameFont: "Carattere Nome",
+        descFont: "Carattere Descrizione",
+        section4Title: "4. Esporta Risultati",
+        preview: "Anteprima",
+        saveSettings: "Salva impostazioni",
+        resetAll: "Reimposta tutto",
+        exportWithDesc: "Esporta (+ desc)",
+        exportNoDesc: "Esporta (senza desc)",
+        separateZips: "ZIP separati",
+        zipImagesOnly: "ZIP immagini",
+        zipMetaOnly: "ZIP metadati",
+        progress: "Progresso",
+        ready: "Pronto",
+        realtimePreview: "Anteprima in tempo reale",
+        liveReactive: "Live • Reattivo",
+        downloadLive: "Scarica l'anteprima",
+        liveHint: "Mostra la prima immagine di origine con lo stile selezionato in tempo reale.",
+        previewSection: "Anteprima",
+        upTo3Images: "Fino a 3 immagini di origine",
+        resetConfirm: "Reimpostare tutte le impostazioni?",
+        noImagesLoaded: "Nessuna immagine caricata",
+        previewError: "Errore anteprima: ",
+        noImages: "Nessuna immagine",
+        finalizingZip: "Finalizzazione ZIP…",
+        done: "Completato ✅",
+        settingsSaved: "Impostazioni salvate ✅",
+        onlyImagesAccepted: "Vengono accettate solo immagini",
+        themeToggleLabel: "Cambia tema"
+      }
+    };
+
+    // New language update function
+    const originalAlert = window.alert;
+    function updateLanguage(lang) {
+      const elements = document.querySelectorAll('[data-i18n]');
+      elements.forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          if (key.includes('Hint') || key === 'noFrameHint') {
+            el.innerHTML = translations[lang][key];
+          } else {
+            el.textContent = translations[lang][key];
+          }
+        }
+      });
+      document.getElementById('cid').placeholder = translations[lang].cidHint.replace('Utilisé dans <code>ipfs://CID/fichier.png</code>', 'ex: QmXyz...');
+      document.getElementById('desc').textContent = translations[lang].uniquePieceDesc;
+      document.getElementById('theme-toggle').ariaLabel = translations[lang].themeToggleLabel;
+      document.title = translations[lang].appTitle;
+      const wmSelect = document.getElementById('wm');
+      if (wmSelect) {
+        wmSelect.options[0].textContent = translations[lang].active;
+        wmSelect.options[1].textContent = translations[lang].off;
+      }
+      const colorModeSelect = document.getElementById('colorMode');
+      if (colorModeSelect) {
+        colorModeSelect.options[0].textContent = translations[lang].originalImage;
+        colorModeSelect.options[1].textContent = translations[lang].goldenColor;
+        colorModeSelect.options[2].textContent = translations[lang].randomGradient;
+        colorModeSelect.options[3].textContent = translations[lang].shapesRandom;
+        colorModeSelect.options[4].textContent = translations[lang].glitch;
+        colorModeSelect.options[5].textContent = translations[lang].neon;
+        colorModeSelect.options[6].textContent = translations[lang].halloween;
+        colorModeSelect.options[7].textContent = translations[lang].pixelArt;
+        colorModeSelect.options[8].textContent = translations[lang].random;
+      }
+      window.alert = (msg) => {
+        const translatedMsg = translations[lang][msg] || msg;
+        originalAlert(translatedMsg);
+      };
+    }
+
+    // Palettes de couleurs
+    const palette = ["#e63946","#2a9d8f","#457b9d","#f4a261","#ffb703","#9d4edd","#06d6a0","#ef476f","#118ab2","#ffd166","#7209b7","#3a0ca3","#4361ee","#4cc9f0","#f72585","#ffbe0b","#fb5607","#ff006e","#8338ec","#3d405b","#ff7f51","#f2c94c","#27ae60","#8e44ad","#c0392b"];
+    const halloweenPalette = ["#000000", "#ff7f00", "#6a0572", "#5e548e", "#c5e063", "#f2c94c", "#f77f00"];
+    const neonPalette = ["#00ffff", "#ff00ff", "#ff0000", "#ffff00", "#00ff00", "#0080ff", "#ff8000"];
+    const glitchPalette = ["#ff00ff", "#00ffff", "#ffff00", "#ff0000", "#00ff00", "#0000ff", "#8a2be2"];
+
+    /* ---------- helpers ---------- */
+    function show(el, yes) { el.classList.toggle('hidden', !yes); }
+    function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+    function getVariantCount(){const v=parseInt(countInput.value,10);return v>0&&v<=10000?v:5;}
+    function quoteFamily(f){ return (f && f.includes(' ')) ? '"'+f+'"' : (f||'Inter'); }
+    function makeFont(sizePx, family, weight){ return `${weight?weight+' ':''}${sizePx}px ${quoteFamily(family)}`; }
+
+    /* ---------- UI : cadre ---------- */
+    addFrameChk.addEventListener('change', ()=> { show(frameOptions, addFrameChk.checked); liveUpdate(); });
+    framePaddingX.addEventListener('input', ()=> { framePaddingXValue.textContent = framePaddingX.value; liveUpdate(); });
+    framePaddingY.addEventListener('input', ()=> { framePaddingYValue.textContent = framePaddingY.value; liveUpdate(); });
+    photoSize.addEventListener('input', ()=> { photoSizeValue.textContent = photoSize.value; liveUpdate(); });
+    nameFontSize.addEventListener('input', ()=> { nameFontSizeValue.textContent = nameFontSize.value; liveUpdate(); });
+    descFontSize.addEventListener('input', ()=> { descFontSizeValue.textContent = descFontSize.value; liveUpdate(); });
+    nameFont.addEventListener('change', ()=> { liveUpdate(); });
+    descFont.addEventListener('change', ()=> { liveUpdate(); });
+    colorModeSelect.addEventListener('change', ()=> { liveUpdate(); });
+    baseNameInput.addEventListener('input', ()=> { liveUpdate(); });
+    descInput.addEventListener('input', ()=> { liveUpdate(); });
+    frameColorInput.addEventListener('input', ()=> { liveUpdate(); });
+    descColorInput.addEventListener('input', ()=> { liveUpdate(); });
+    keepOriginalSizeChk.addEventListener('change', ()=> liveUpdate());
+    sizeInput.addEventListener('input', ()=> liveUpdate());
+    wmSelect.addEventListener('change', ()=> liveUpdate());
+    langSelect.addEventListener('change', (e) => {
+        const newLang = e.target.value;
+        localStorage.setItem('nftGenLang', newLang);
+        updateLanguage(newLang);
+        liveUpdate();
+    });
+
+    resetMarginsBtn.addEventListener('click', ()=> {
+      framePaddingX.value = 0; framePaddingY.value = 0;
+      framePaddingXValue.textContent = '0'; framePaddingYValue.textContent = '0';
+      liveUpdate();
+    });
+
+    resetAllBtn.addEventListener('click', ()=> {
+      if (confirm(translations[langSelect.value].resetConfirm)) {
+        localStorage.removeItem('nftGenSettingsV4');
+        location.reload();
+      }
+    });
+
+    /* ---------- drag & drop ---------- */
+    dropZone.addEventListener('click', ()=> fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', ()=> dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+      if (!files.length) return;
+      const dt = new DataTransfer(); files.forEach(f => dt.items.add(f)); fileInput.files = dt.files;
+      lastFile = fileInput.files[0]; liveUpdate();
+    });
+
+    fileInput.addEventListener('change', e => {
+      const files = [...e.target.files];
+      if (!files.length) return;
+      const ok = files.every(f => f.type.startsWith('image/'));
+      if (!ok) { alert(translations[langSelect.value].onlyImagesAccepted); fileInput.value=''; return; }
+      lastFile = files[0]; liveUpdate();
+    });
+
+    /* ---------- image loader ---------- */
+    function fileToImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(translations[langSelect.value].previewError + file.name));
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    /* styles */
+    
+    function drawGoldenStyle(ctx, img, index, w, h, filter) {
+      drawBaseImage(ctx,img,w,h,filter);
+      const strongColors = ["#ff0000","#00ff00","#0000ff","#ffff00","#ff00ff","#00ffff","#ff8800","#ff1493"];
+      let g;
+      if (index % 2 === 0) {
+        const baseColor = strongColors[index % strongColors.length];
+        g = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)/2);
+        g.addColorStop(0, baseColor + "99");
+        g.addColorStop(1, baseColor + "33");
+      } else {
+        const hue = (index * 137.5) % 360;
+        g = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)/2);
+        g.addColorStop(0, `hsla(${hue},100%,50%,0.6)`);
+        g.addColorStop(1, `hsla(${(hue+180)%360},80%,50%,0.25)`);
+      }
+      ctx.globalCompositeOperation = 'color';
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawGradientStyle(ctx, img, index, w, h, filter) {
+      drawBaseImage(ctx,img,w,h,filter);
+      const g = ctx.createLinearGradient(0,0,w,h);
+      g.addColorStop(0, palette[Math.floor(Math.random()*palette.length)]);
+      g.addColorStop(1, palette[Math.floor(Math.random()*palette.length)]);
+      ctx.globalCompositeOperation = 'color'; ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawShapesStyle(ctx, img, index, w, h, filter) {
+        drawBaseImage(ctx, img, w, h, filter);
+        const numShapes = Math.floor(Math.random() * 8) + 5;
+        const colors = palette.slice();
+        for (let i = 0; i < numShapes; i++) {
+            const shapeType = Math.random();
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            ctx.fillStyle = color + "CC";
+            ctx.globalCompositeOperation = 'overlay';
+            if (shapeType < 0.2) {
+                const radius = Math.random() * (Math.min(w, h) / 4) + 20;
+                const x = Math.random() * w; const y = Math.random() * h;
+                ctx.beginPath(); ctx.arc(x, y, radius, 0, 2 * Math.PI); ctx.fill();
+            } else if (shapeType < 0.4) {
+                const rw = Math.random() * (w / 3) + 30; const rh = Math.random() * (h / 3) + 30;
+                const rx = Math.random() * (w - rw); const ry = Math.random() * (h - rh);
+                ctx.fillRect(rx, ry, rw, rh);
+            } else if (shapeType < 0.6) {
+                const s = Math.random() * (Math.min(w, h) / 3) + 30;
+                const tx = Math.random() * (w - s); const ty = Math.random() * (h - s);
+                ctx.beginPath(); ctx.moveTo(tx + s / 2, ty); ctx.lineTo(tx + s, ty + s); ctx.lineTo(tx, ty + s); ctx.closePath(); ctx.fill();
+            } else if (shapeType < 0.8) {
+                const dw = Math.random() * (w / 2) + 40; const dh = Math.random() * (h / 2) + 40;
+                const dx = Math.random() * (w - dw); const dy = Math.random() * (h - dh);
+                ctx.beginPath(); ctx.moveTo(dx + dw / 2, dy); ctx.lineTo(dx + dw, dy + dh / 2); ctx.lineTo(dx + dw / 2, dy + dh); ctx.lineTo(dx, dy + dh / 2); ctx.closePath(); ctx.fill();
+            } else {
+                const outerRadius = Math.random() * (Math.min(w, h) / 5) + 30; const innerRadius = outerRadius / 2;
+                const cx = Math.random() * w; const cy = Math.random() * h; const spikes = 5;
+                ctx.beginPath();
+                for (let j = 0; j < spikes; j++) {
+                    let angle = (j / spikes) * Math.PI * 2;
+                    let x = cx + Math.cos(angle) * outerRadius; let y = cy + Math.sin(angle) * outerRadius; ctx.lineTo(x, y);
+                    angle += Math.PI / spikes;
+                    x = cx + Math.cos(angle) * innerRadius; y = cy + Math.sin(angle) * innerRadius; ctx.lineTo(x, y);
+                }
+                ctx.closePath(); ctx.fill();
+            }
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+    
+    function drawHalloweenStyle(ctx, img, index, w, h, filter) {
+        drawBaseImage(ctx, img, w, h, filter);
+        const numShapes = Math.floor(Math.random() * 8) + 5;
+        const colors = halloweenPalette.slice();
+        const baseColor = colors[Math.floor(Math.random() * colors.length)];
+        ctx.globalCompositeOperation = 'color';
+        ctx.fillStyle = baseColor;
+        ctx.fillRect(0,0,w,h);
+        ctx.globalCompositeOperation = 'source-over';
+        for (let i = 0; i < numShapes; i++) {
+            const shapeType = Math.random();
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            ctx.fillStyle = color + "CC";
+            ctx.globalCompositeOperation = 'overlay';
+            if (shapeType < 0.25) {
+                const radius = Math.random() * (Math.min(w, h) / 4) + 20; const x = Math.random() * w; const y = Math.random() * h;
+                ctx.beginPath(); ctx.arc(x, y, radius, 0, 2 * Math.PI); ctx.fill();
+            } else if (shapeType < 0.5) {
+                const s = Math.random() * (Math.min(w, h) / 3) + 30; const tx = Math.random() * (w - s); const ty = Math.random() * (h - s);
+                ctx.beginPath(); ctx.moveTo(tx + s / 2, ty); ctx.lineTo(tx + s, ty + s); ctx.lineTo(tx, ty + s); ctx.closePath(); ctx.fill();
+            } else if (shapeType < 0.75) {
+                const rw = Math.random() * (w / 3) + 30; const rh = Math.random() * (h / 3) + 30;
+                const rx = Math.random() * (w - rw); const ry = Math.random() * (h - rh); ctx.fillRect(rx, ry, rw, rh);
+            } else {
+                const points = 4 + Math.floor(Math.random() * 5);
+                const cx = Math.random() * w; const cy = Math.random() * h; const size = Math.random() * (Math.min(w,h) / 3) + 20;
+                ctx.beginPath();
+                for (let j = 0; j < points; j++) {
+                    const angle = (j / points) * Math.PI * 2;
+                    const x = cx + Math.cos(angle) * size * (0.8 + Math.random() * 0.4);
+                    const y = cy + Math.sin(angle) * size * (0.8 + Math.random() * 0.4);
+                    ctx.lineTo(x,y);
+                }
+                ctx.closePath(); ctx.fill();
+            }
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawGlitchStyle(ctx, img, index, w, h, filter) {
+        drawBaseImage(ctx, img, w, h, filter);
+        const baseColor = glitchPalette[Math.floor(Math.random() * glitchPalette.length)];
+        ctx.globalCompositeOperation = 'color';
+        ctx.fillStyle = baseColor;
+        ctx.fillRect(0,0,w,h);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalCompositeOperation = 'difference';
+        ctx.fillStyle = baseColor;
+        const numBlocks = Math.floor(Math.random() * 10) + 5;
+        for (let i = 0; i < numBlocks; i++) {
+            const blockHeight = Math.random() * (h / 50) + 2; const blockY = Math.random() * (h - blockHeight);
+            const blockX = Math.random() * (w / 20) - w / 40; ctx.fillRect(blockX, blockY, w, blockHeight);
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawNeonStyle(ctx, img, index, w, h, filter) {
+        drawBaseImage(ctx, img, w, h, filter);
+        const baseColor = neonPalette[Math.floor(Math.random() * neonPalette.length)];
+        ctx.globalCompositeOperation = 'color';
+        ctx.fillStyle = baseColor;
+        ctx.fillRect(0,0,w,h);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.shadowBlur = 15;
+        const numLines = Math.floor(Math.random() * 6) + 3;
+        for (let i = 0; i < numLines; i++) {
+            const startX = Math.random() * w; const startY = Math.random() * h;
+            const endX = Math.random() * w; const endY = Math.random() * h;
+            const color = neonPalette[Math.floor(Math.random() * neonPalette.length)];
+            ctx.strokeStyle = color; ctx.shadowColor = color; ctx.lineWidth = Math.random() * 4 + 2;
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(endX, endY); ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawPixelArtStyle(ctx, img, w, h, filter) {
+        const pixelSize = 16;
+        const smallCanvas = document.createElement('canvas');
+        smallCanvas.width = Math.floor(w / pixelSize); smallCanvas.height = Math.floor(h / pixelSize);
+        const smallCtx = smallCanvas.getContext('2d');
+        smallCtx.imageSmoothingEnabled = false;
+        smallCtx.drawImage(img, 0, 0, smallCanvas.width, smallCanvas.height);
+        drawBaseImage(smallCtx, img, smallCanvas.width, smallCanvas.height, filter);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(smallCanvas, 0, 0, w, h);
+        ctx.imageSmoothingEnabled = true;
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawRandomStyle(ctx,img,index,w,h,filter) {
+      const styles = ['golden', 'gradient', 'shapes', 'halloween', 'glitch', 'neon', 'pixel-art'];
+      const chosenStyle = styles[Math.floor(Math.random() * styles.length)];
+      applyStyle(ctx, img, index, w, h, chosenStyle, filter);
+    }
+    
+    function applyFilter(ctx, filter) {
+      try { ctx.filter = filter || 'none'; } catch(e) { ctx.filter = 'none'; }
+    }
+    function drawBaseImage(ctx, img, w, h, filter) {
+      applyFilter(ctx, filter);
+      ctx.drawImage(img, 0, 0, w, h);
+      ctx.filter = 'none';
+    }
+
+    function applyStyle(ctx,img,index,w,h,style,filter){
+      if (style === 'original') drawBaseImage(ctx, img, w, h, filter);
+      else if (style === 'golden') drawGoldenStyle(ctx, img, index, w, h, filter);
+      else if (style === 'gradient') drawGradientStyle(ctx, img, index, w, h, filter);
+      else if (style === 'shapes') drawShapesStyle(ctx, img, index, w, h, filter);
+      else if (style === 'halloween') drawHalloweenStyle(ctx, img, index, w, h, filter);
+      else if (style === 'glitch') drawGlitchStyle(ctx, img, index, w, h, filter);
+      else if (style === 'neon') drawNeonStyle(ctx, img, index, w, h, filter);
+      else if (style === 'pixel-art') drawPixelArtStyle(ctx, img, w, h, filter);
+      else drawRandomStyle(ctx, img, index, w, h, filter);
+    }
+
+    /* frame */
+    function lighten(hex,percent){ const num=parseInt(hex.slice(1),16); const amt=Math.round(2.55*percent); let R=(num>>16)+amt; let G=(num>>8&0x00FF)+amt; let B=(num&0x0000FF)+amt; R=Math.min(255,Math.max(0,R)); G=Math.min(255,Math.max(0,G)); B=Math.min(255,Math.max(0,B)); return '#'+(0x1000000 + (R<<16)+(G<<8)+B).toString(16).slice(1); }
+    function drawFrame(ctx,w,h,frameColor) {
+      const bg = ctx.createLinearGradient(0,0,0,h);
+      bg.addColorStop(0, lighten(frameColor,30));
+      bg.addColorStop(1, frameColor);
+      ctx.fillStyle = bg;
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(0,0,w,h,16); ctx.fill(); } else { ctx.fillRect(0,0,w,h); }
+    }
+
+    function drawVariant(img, index, outSize, previewMode=false) {
+      const style = colorModeSelect.value;
+      const filter = 'none';
+      const wantFrame = addFrameChk.checked;
+
+      let canvasW, canvasH;
+      if (previewMode) {
+          canvasW = img.width;
+          canvasH = img.height;
+      } else if (keepOriginalSizeChk.checked) {
+          canvasW = img.width; canvasH = img.height;
+      } else {
+          canvasW = canvasH = parseInt(sizeInput.value, 10) || 1024;
+      }
+
+      if (wantFrame && !(parseInt(framePaddingX.value,10)==0 && parseInt(framePaddingY.value,10)==0)) {
+        const baseW = canvasW; const baseH = canvasH;
+        const padXpx = Math.round((parseInt(framePaddingX.value,10)||0)/100 * baseW);
+        const padYpx = Math.round((parseInt(framePaddingY.value,10)||0)/100 * baseH);
+        canvasW = baseW + padXpx*2; canvasH = baseH + padYpx*2;
+        const canvas = document.createElement('canvas'); canvas.width = canvasW; canvas.height = canvasH;
+        const ctx = canvas.getContext('2d');
+        drawFrame(ctx,canvasW,canvasH, frameColorInput.value || '#3d5a80');
+        const innerX = Math.round(canvasW*0.06); const nameBandTop = Math.round(canvasH*0.08);
+        const nameBandH = Math.round(canvasH*0.08); const innerY = nameBandTop + Math.round(canvasW*0.02);
+        const innerW = Math.round(canvasW - innerX*2); const descBandH = Math.round(canvasH*0.15);
+        const descBandTop = canvasH - Math.round(canvasH*0.18); const innerH = Math.round(canvasH - innerY - descBandH);
+        const temp = document.createElement('canvas'); temp.width = img.width; temp.height = img.height;
+        const tctx = temp.getContext('2d');
+        applyStyle(tctx, img, index, temp.width, temp.height, style, filter);
+        const imgRatio = temp.width / temp.height; const innerRatio = innerW / innerH;
+        let dw, dh;
+        if (imgRatio > innerRatio) { dw = innerW * (parseInt(photoSize.value,10)||85)/100; dh = dw / imgRatio; }
+        else { dh = innerH * (parseInt(photoSize.value,10)||85)/100; dw = dh * imgRatio; }
+        const dx = innerX + (innerW - dw)/2; const dy = innerY + (innerH - dh)/2;
+        ctx.save();
+        if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(innerX, innerY, innerW, innerH, 12); ctx.clip(); }
+        else { ctx.beginPath(); ctx.rect(innerX, innerY, innerW, innerH); ctx.clip(); }
+        ctx.drawImage(temp, 0, 0, temp.width, temp.height, dx, dy, dw, dh);
+        ctx.restore();
+        ctx.fillStyle = lighten(frameColorInput.value || '#3d5a80', 60);
+        ctx.fillRect(innerX, nameBandTop, innerW, nameBandH); ctx.fillRect(innerX, descBandTop, innerW, descBandH);
+        ctx.fillStyle = descColorInput.value || '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const namePx = Math.round(canvasW * 0.03 * (parseInt(nameFontSize.value,10)||100)/100);
+        ctx.font = makeFont(namePx, nameFont.value, 'bold');
+        ctx.fillText(`${baseNameInput.value} #${index+1}`, innerX + innerW/2, nameBandTop + nameBandH/2);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        const descPx = Math.round(canvasW * 0.015 * (parseInt(descFontSize.value,10)||100)/100);
+        ctx.font = makeFont(descPx, descFont.value, '');
+        const descText = descInput.value || '';
+        const maxWidth = innerW - 20; const words = descText.split(' ');
+        let line = '', lines = [];
+        for (let n=0;n<words.length;n++) {
+          const testLine = line + words[n] + ' ';
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && n>0) { lines.push(line.trim()); line = words[n] + ' '; }
+          else line = testLine;
+        }
+        if (line) lines.push(line.trim());
+        const lineHeight = Math.round(descPx * 1.2);
+        const blockH = lines.length * lineHeight;
+        let yPos = descBandTop + Math.max(0, Math.floor((descBandH - blockH)/2));
+        for (let l of lines) { ctx.fillText(l, innerX + innerW/2, yPos); yPos += lineHeight; }
+        return canvas;
+      } else {
+        const canvas = document.createElement('canvas');
+        canvas.width = canvasW; canvas.height = canvasH;
+        const ctx = canvas.getContext('2d');
+        applyStyle(ctx, img, index, canvas.width, canvas.height, style, filter);
+        return canvas;
+      }
+    }
+
+    /* ---------- preview ---------- */
+    async function generatePreview() {
+      const files = fileInput.files; preview.innerHTML = '';
+      if (!files || !files.length) { alert(translations[langSelect.value].noImagesLoaded); return; }
+      const variants = getVariantCount();
+      try {
+        if (document.fonts && document.fonts.ready) { await document.fonts.ready; }
+        for (let f=0; f<Math.min(files.length,3); f++) {
+          const img = await fileToImage(files[f]);
+          for (let v=0; v<variants; v++) {
+            const canvas = drawVariant(img, f*variants+v, null, true);
+            const ctn = document.createElement('div'); ctn.className='thumb'; ctn.appendChild(canvas);
+            const badge = document.createElement('div'); badge.className='badge'; badge.textContent = `${files[f].name} #${v+1}`;
+            ctn.appendChild(badge); preview.appendChild(ctn);
+          }
+        }
+        [zipWithDescBtn,zipNoDescBtn,zipSepBothBtn,zipImagesOnlyBtn,zipMetaOnlyBtn].forEach(b=>b.disabled=false);
+      } catch(e) { alert(translations[langSelect.value].previewError + e.message); }
+    }
+    generateBtn.addEventListener('click', generatePreview);
+
+    /* ---------- file checks + live ---------- */
+    let lastFile = null;
+
+    /* ---------- metadata ---------- */
+    function createMetadata(index, filename, cid, withDesc) {
+      const collection = collectionNameInput.value || 'MyCollection';
+      return {
+        name: `${baseNameInput.value} #${index+1}`,
+        description: withDesc ? descInput.value : '',
+        image: `ipfs://${cid}/${filename}`,
+        external_url: window.location.href,
+        attributes: [
+          { trait_type: "Collection", value: collection },
+          { trait_type: "Variant", value: `#${index+1}` },
+          { trait_type: "Style", value: colorModeSelect.value }
+        ]
+      };
+    }
+
+    /* ---------- Worker-based ZIP export ---------- */
+    async function generateZip(includeDesc=false, separate=false, imagesOnly=false, metaOnly=false) {
+      const files = fileInput.files; if (!files || !files.length) { alert(translations[langSelect.value].noImages); return; }
+      progressBar.value = 0; progressLabel.textContent = translations[langSelect.value].ready;
+      const cid = cidInput.value.trim() || 'QmXyz123abc';
+      const variants = getVariantCount();
+      const total = files.length * variants;
+      let done = 0;
+      const zip = new JSZip();
+      for (let f=0; f<files.length; f++) {
+        const img = await fileToImage(files[f]);
+        const baseName = files[f].name.split('.').slice(0,-1).join('.') || 'image';
+        for (let v=0; v<variants; v++) {
+          const idx = f*variants + v;
+          const fname = `${baseName}-${v+1}.png`;
+          const canvas = drawVariant(img, idx, parseInt(sizeInput.value,10)||1024, false);
+          if (wmSelect.value === 'on') {
+            const ctx = canvas.getContext('2d'); ctx.globalAlpha = 0.18; ctx.font = '18px sans-serif'; ctx.textAlign='right';
+            const col = collectionNameInput.value || 'Collection';
+            ctx.fillStyle = '#fff'; ctx.fillText(col, canvas.width-12, canvas.height-12); ctx.globalAlpha = 1.0;
+          }
+          const blob = await new Promise(res => canvas.toBlob(res,'image/png'));
+          const folderBase = useSubfolders.checked ? `${baseName}/` : '';
+          if (separate || imagesOnly) { const imagesFolder = useSubfolders.checked ? `${baseName}/images/` : ''; zip.file(`${imagesFolder}${fname}`, blob); }
+          if (separate || metaOnly) { const metaFolder = useSubfolders.checked ? `${baseName}/metadata/` : ''; zip.file(`${metaFolder}${fname.replace('.png','.json')}`, JSON.stringify(createMetadata(idx,fname,cid,includeDesc),null,2)); }
+          if (!separate && !imagesOnly && !metaOnly) { zip.file(`${folderBase}${fname}`, blob); zip.file(`${folderBase}${fname.replace('.png','.json')}`, JSON.stringify(createMetadata(idx,fname,cid,includeDesc),null,2)); }
+          done++;
+          progressBar.value = Math.round((done/total)*100);
+          progressLabel.textContent = `${done} / ${total}`;
+        }
+      }
+      progressLabel.textContent = translations[langSelect.value].finalizingZip;
+      const blobZip = await zip.generateAsync({type:'blob'});
+      saveAs(blobZip, separate? (imagesOnly? 'images.zip' : metaOnly? 'metadata.zip' : 'nft_collection.zip') : (includeDesc? 'nft_with_desc.zip':'nft_no_desc.zip'));
+      progressBar.value = 100; progressLabel.textContent = translations[langSelect.value].done;
+    }
+
+    /* wire zip buttons */
+    zipWithDescBtn.addEventListener('click', ()=>generateZip(true,false,false,false));
+    zipNoDescBtn.addEventListener('click', ()=>generateZip(false,false,false,false));
+    zipSepBothBtn.addEventListener('click', ()=>generateZip(true,true,false,false));
+    zipImagesOnlyBtn.addEventListener('click', ()=>generateZip(true,true,true,false));
+    zipMetaOnlyBtn.addEventListener('click', ()=>generateZip(true,true,false,true));
+
+    /* polyfill roundRect */
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
+        if (w<2*r) r=w/2; if (h<2*r) r=h/2;
+        this.beginPath(); this.moveTo(x+r,y); this.arcTo(x+w,y,x+w,y+h,r); this.arcTo(x+w,y+h,x,y+h,r);
+        this.arcTo(x,y+h,x,y,r); this.arcTo(x,y,x+w,y,r); this.closePath(); return this;
+      };
+    }
+    
+    /* live update */
+    const liveCtrls = [framePaddingX,framePaddingY,addFrameChk,colorModeSelect,photoSize,frameColorInput,descColorInput,nameFont,descFont,nameFontSize,descFontSize,baseNameInput,descInput,keepOriginalSizeChk,sizeInput,wmSelect];
+    let updating=false; let lastFontsReady=false;
+    
+    async function liveUpdate() {
+      if (updating) return; updating = true;
+      try {
+        if (!lastFile) { previewLive.innerHTML=''; downloadLiveBtn.disabled=true; updating=false; return; }
+        const nameF = quoteFamily(nameFont.value);
+        const descF = quoteFamily(descFont.value);
+        if (document.fonts && document.fonts.load) {
+          try {
+            await Promise.all([
+              document.fonts.load(`bold 32px ${nameF}`),
+              document.fonts.load(`16px ${descF}`)
+            ]);
+          } catch(e) { console.warn('font load error', e); }
+        }
+        const img = await fileToImage(lastFile);
+        previewLive.innerHTML='';
+        const canvas = drawVariant(img, 0, null, true);
+        const ctn = document.createElement('div'); ctn.className='thumb'; ctn.appendChild(canvas);
+        previewLive.appendChild(ctn);
+        downloadLiveBtn.disabled=false;
+      } catch(e){ console.warn(e); }
+      finally { updating=false; }
+    }
+
+    liveCtrls.forEach(el => el && el.addEventListener && el.addEventListener('input', liveUpdate));
+    
+    downloadLiveBtn.addEventListener('click', () => {
+        const liveCanvas = previewLive.querySelector('canvas');
+        if (liveCanvas) {
+            liveCanvas.toBlob(function(blob) {
+                saveAs(blob, `live-preview-${Date.now()}.png`);
+            });
+        }
+    });
+
+    /* ---------- save/load settings ---------- */
+    function saveSettings() {
+      const s = {
+        baseName: baseNameInput.value, collectionName: collectionNameInput.value,
+        desc: descInput.value, cid: cidInput.value, useSubfolders: useSubfolders.checked,
+        colorMode: colorModeSelect.value,
+        addFrame: addFrameChk.checked, framePaddingX: framePaddingX.value, framePaddingY: framePaddingY.value,
+        frameColor: frameColorInput.value, descColor: descColorInput.value, photoSize: photoSize.value,
+        nameFont: nameFont.value, descFont: descFont.value, nameFontSize: nameFontSize.value, descFontSize: descFontSize.value,
+        size: sizeInput.value, watermark: wmSelect.value, count: countInput.value, keepOriginalSize: keepOriginalSizeChk.checked
+      };
+      localStorage.setItem('nftGenSettingsV4', JSON.stringify(s));
+      alert(translations[langSelect.value].settingsSaved);
+    }
+    function loadSettings() {
+      const raw = localStorage.getItem('nftGenSettingsV4'); if (!raw) return;
+      try {
+        const s = JSON.parse(raw);
+        if (s.baseName) baseNameInput.value = s.baseName;
+        if (s.collectionName) collectionNameInput.value = s.collectionName;
+        if (s.desc) descInput.value = s.desc;
+        if (s.cid) cidInput.value = s.cid;
+        if (typeof s.useSubfolders === 'boolean') useSubfolders.checked = s.useSubfolders;
+        if (s.colorMode) colorModeSelect.value = s.colorMode;
+        if (typeof s.addFrame === 'boolean') addFrameChk.checked = s.addFrame;
+        if (s.framePaddingX) framePaddingX.value = s.framePaddingX, framePaddingXValue.textContent = s.framePaddingX;
+        if (s.framePaddingY) framePaddingY.value = s.framePaddingY, framePaddingYValue.textContent = s.framePaddingY;
+        if (s.frameColor) frameColorInput.value = s.frameColor;
+        if (s.descColor) descColorInput.value = s.descColor;
+        if (s.photoSize) photoSize.value = s.photoSize, photoSizeValue.textContent = s.photoSize;
+        if (s.nameFont) nameFont.value = s.nameFont;
+        if (s.descFont) descFont.value = s.descFont;
+        if (s.nameFontSize) nameFontSize.value = s.nameFontSize, nameFontSizeValue.textContent = s.nameFontSize;
+        if (s.descFontSize) descFontSize.value = s.descFontSize, descFontSizeValue.textContent = s.descFontSize;
+        if (s.size) sizeInput.value = s.size;
+        if (s.watermark) wmSelect.value = s.watermark;
+        if (s.count) countInput.value = s.count;
+        if (typeof s.keepOriginalSize === 'boolean') keepOriginalSizeChk.checked = s.keepOriginalSize;
+        show(frameOptions, addFrameChk.checked);
+      } catch(e){ console.warn('load error', e); }
+    }
+    saveSettingsBtn.addEventListener('click', saveSettings);
+    loadSettings();
+
+    /* initial UI state */
+    framePaddingXValue.textContent = framePaddingX.value; framePaddingYValue.textContent = framePaddingY.value;
+    photoSizeValue.textContent = photoSize.value;
+    nameFontSizeValue.textContent = nameFontSize.value;
+    descFontSizeValue.textContent = descFontSize.value;
+
+    // Fonts ready -> premier rendu live
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => liveUpdate());
+    }
+
+    // expose for debug
+    window._nftGen = { drawVariant, generatePreview, liveUpdate, createMetadata };
+  
+    /* ---------- font preview in selects ---------- */
+    function styleFontOptions(selectId) {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      for (let opt of sel.options) {
+        opt.style.fontFamily = `'${opt.text}', Inter, sans-serif`;
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('nftGenLang');
+      if (savedLang) {
+          langSelect.value = savedLang;
+      } else {
+          langSelect.value = 'fr'; // Default
+      }
+      updateLanguage(langSelect.value);
+      styleFontOptions('nameFont');
+      styleFontOptions('descFont');
+    });
+
+    /* ---------- theme switcher ---------- */
+    const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    if (currentTheme === 'light') {
+        document.body.classList.add('light-mode');
+        sunIcon.style.display = 'block';
+    } else {
+        moonIcon.style.display = 'block';
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+        if (document.body.classList.contains('light-mode')) {
+            document.body.classList.remove('light-mode');
+            localStorage.setItem('theme', 'dark');
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            document.body.classList.add('light-mode');
+            localStorage.setItem('theme', 'light');
+            moonIcon.style.display = 'none';
+            sunIcon.style.display = 'block';
+        }
+    });
+  </script>
+</body>
+</html>
